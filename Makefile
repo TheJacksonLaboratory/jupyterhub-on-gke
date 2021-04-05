@@ -14,7 +14,7 @@ NETWORK="projects/${PROJECT_ID}/global/networks/default" #(note this can be a sh
 SUBNETWORK="projects/${PROJECT_ID}/regions/${REGION}/subnetworks/default"
 GCR_BUCKET=gs://artifacts.${PROJECT_ID}.appspot.com #(if us.gcr.io, use us.artifacts)
 NETWORK_TAG="jupyterhub"
-CONNECT_ONPREM=false
+CONNECT_ONPREM=true
 GCP_NODES_SVC=gke-nodes
 GCP_WI_SVC="jupyterhub-workload-sa"
 KUBE_WI_SVC="jupyterhub-workload-k8s-sa"
@@ -33,7 +33,8 @@ endif
 
 deploy: vars connect-cluster create-namespace enable-wi install-jupyterhub enable-apparmor enable-psp restart get-ip ## connect to cluster, enable workload identity, install jupyterhub, enable apparmor and psp, restart Jupyterhub 
 restart:  install-jupyterhub ## restart Jupyterhub after configuration changes
-connect-onprem: vars connect-cluster enable-apparmor enable-psp apply-ip-masq-agent install-jupyterhub get-ip
+connect-onprem: apply-ip-masq-agent ## apply ip masq agent 
+deploy-onprem: vars connect-cluster connect-onprem create-namespace enable-wi install-jupyterhub enable-apparmor restart get-ip ## deploy jupyterhub with connection back to onprem
 retry: install-jupyterhub enable-apparmor enable-psp restart get-ip ## retry installing jupyterhub
 
 vars: # Display variables
@@ -123,7 +124,7 @@ install-jupyterhub: ## install jupyterhub
 	  --version=${JUPYTERHUB_VERSION} \
 	  --values config.yaml \
 	  --create-namespace \
-	  --wait --timeout 1000s \
+	  --wait --timeout 1200s \
 	  ${libs}
 
 get-ip: ## get the intenal (if NodePort) or external (if Load Balancer) IP address for public proxy
@@ -166,7 +167,7 @@ get-status: ## get status of the deployments
 delete-release: ## delete the delete
 	helm delete ${HELM_RELEASE} --namespace ${KUBE_NAMESPACE}
 
-cleanup-namespace: ## clean the workloads in the namespace
+cleanup: ## clean the workloads in the namespace
 	kubectl delete all --all --namespace ${KUBE_NAMESPACE}
 
 disable-psp: ## disable the pod security policy

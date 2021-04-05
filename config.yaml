@@ -12,8 +12,8 @@ proxy:
       enabled: true
   securityContext:
     enabled: true
-  ingress:
-    enabled: true
+#  ingress:
+#    enabled: true
 
 rbac:
   enabled: true
@@ -44,8 +44,8 @@ singleuser:
     guarantee: 1G
     storage:
     capacity: 2Gi
-  ingress:
-    enabled: true
+#  ingress:
+#    enabled: true
   extraAnnotations:
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
     container.apparmor.security.beta.kubernetes.io/notebook: 'localhost/jupyter-apparmor'
@@ -88,8 +88,8 @@ hub:
     enabled: true
   networkPolicy:
     enabled: true
-  ingress:
-    enabled: true
+# ingress:
+#    enabled: true
 
 scheduling:
   userScheduler:
