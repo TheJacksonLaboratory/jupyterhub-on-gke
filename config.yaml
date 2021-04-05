@@ -1,0 +1,105 @@
+proxy:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080
+      https: 30443
+  secretToken: "4235da6ad3e92513ebf9da8377f91ac482629cb7e559a392595be5343ba24ceb"
+  chp:
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+    networkPolicy:
+      enabled: true
+  securityContext:
+    enabled: true
+  ingress:
+    enabled: true
+
+rbac:
+  enabled: true
+
+config:
+  KubeSpawner:
+    run_as_uid: 1000
+
+singleuser:
+  defaultUrl: "/lab"
+  networkPolicy:
+    enabled: true
+  rbac:
+    enabled: true
+  serviceAccountName: jupyterhub-workload-k8s-sa
+  image:
+    name: snamburi3/gcloud-jupyter
+    tag: latest
+  securityContext:
+    enabled: true
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    runAsUser: 1000
+    fsGroup: 1000
+  cmd: start-singleuser.sh
+  memory:
+    limit: 1G
+    guarantee: 1G
+    storage:
+    capacity: 2Gi
+  ingress:
+    enabled: true
+  extraAnnotations:
+    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
+    container.apparmor.security.beta.kubernetes.io/notebook: 'localhost/jupyter-apparmor'
+  profileList:
+    - display_name: "Minimal environment"
+      description: "Minimal enironment with Python."
+      default: true
+      kubespawner_override:
+        image: snamburi3/gcloud-jupyter:latest
+    - display_name: "Datascience environment"
+      description: "Datascience Environment with Python, R, and Julia."
+      kubespawner_override:
+        image: jupyter/datascience-notebook:latest
+    - display_name: "Spark environment"
+      description: "The Jupyter Stacks spark image"
+      kubespawner_override:
+        image: jupyter/all-spark-notebook:latest
+    - display_name: "Data Science Environment"
+      description: "Datascience Environment with gcloud"
+      kubespawner_override:
+        image: snamburi3/gcloud-jupyter:latest
+
+cull:
+  enabled: true
+  users: false
+  removeNamedServers: false
+  timeout: 3600
+  every: 600
+  concurrency: 10
+  maxAge: 0
+
+debug:
+  enabled: false
+
+hub:
+  extraConfig:
+    jupyterlab: |
+      c.Spawner.default_url = "/lab"
+  securityContext:
+    enabled: true
+  networkPolicy:
+    enabled: true
+  ingress:
+    enabled: true
+
+scheduling:
+  userScheduler:
+    enabled: true
+    replicas: 1
+    logLevel: 4
+  userPlaceholder:
+    enabled: true
+    replicas: 1
+  continuous:
+    enabled: true
+  podPriority:
+    enabled: true

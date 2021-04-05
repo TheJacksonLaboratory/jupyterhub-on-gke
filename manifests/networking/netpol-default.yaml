@@ -1,0 +1,10 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all #  all new workloads added to the cluster must explicitly authorize the traffic they require.
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
