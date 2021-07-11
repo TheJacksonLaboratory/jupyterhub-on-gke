@@ -10,11 +10,13 @@ HELM_RELEASE=jhub
 INSTANCE_TYPE=e2-medium
 NUM_NODES=4
 JUPYTERHUB_VERSION=0.10.6
-NETWORK="projects/${PROJECT_ID}/global/networks/default" #(note this can be a shared VPC network. this applies to subnet as well)
-SUBNETWORK="projects/${PROJECT_ID}/regions/${REGION}/subnetworks/default"
+#NETWORK="projects/${PROJECT_ID}/global/networks/default" #(note this can be a shared VPC network. this applies to subnet as well)
+NETWORK="projects/jax-shared-vpc-host-gen/global/networks/jax-gen-us-east-1-vpc"
+SUBNETWORK="projects/jax-shared-vpc-host-gen/regions/us-east1/subnetworks/jax-gen-us-east-1-s17"
+#SUBNETWORK="projects/${PROJECT_ID}/regions/${REGION}/subnetworks/default"
 GCR_BUCKET=gs://artifacts.${PROJECT_ID}.appspot.com #(if us.gcr.io, use us.artifacts)
 NETWORK_TAG="jupyterhub"
-CONNECT_ONPREM=true
+CONNECT_ONPREM=false
 GCP_NODES_SVC=gke-nodes
 GCP_WI_SVC="jupyterhub-workload-sa"
 KUBE_WI_SVC="jupyterhub-workload-k8s-sa"
@@ -32,6 +34,7 @@ else
 endif
 
 deploy: vars connect-cluster create-namespace enable-wi install-jupyterhub enable-apparmor enable-psp restart get-ip ## connect to cluster, enable workload identity, install jupyterhub, enable apparmor and psp, restart Jupyterhub 
+deploy-workshop: vars connect-cluster create-namespace install-jupyterhub enable-apparmor enable-psp restart get-ip ## connect to cluster, install jupyterhub, enable apparmor and psp, restart Jupyterhub (workshops) 
 restart:  install-jupyterhub ## restart Jupyterhub after configuration changes
 connect-onprem: apply-ip-masq-agent ## apply ip masq agent 
 deploy-onprem: vars connect-cluster connect-onprem create-namespace enable-wi install-jupyterhub enable-apparmor restart get-ip ## deploy jupyterhub with connection back to onprem
@@ -61,6 +64,7 @@ create-cluster: create-gcp-nodes-svc ## Create a GKE Cluster
 	  --node-locations ${ZONE} \
 	  --tags ${NETWORK_TAG} \
 	  --service-account "${GCP_NODES_SVC}@${PROJECT_ID}.iam.gserviceaccount.com" \
+	  --scopes "https://www.googleapis.com/auth/cloud-platform" \
 	  --release-channel regular \
 	  --enable-ip-alias \
 	  --default-max-pods-per-node "110" \

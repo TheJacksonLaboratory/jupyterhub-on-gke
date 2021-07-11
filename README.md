@@ -38,9 +38,36 @@ make create-cluster
 # create Kubernetes namespace, and install Jupyterhub.
 make deploy
 
+# use a https load balancer to connect to jupyterhub proxy (backend) on port 30080 (Node Port). you can also create Kubernetes Ingress object on "proxy-public". Make sure you create https load balancer
+
 # Delete the cluster
 make delete
 ```
+
+## Deploying for workshops
+```
+# this is the same command as the `make deploy`, but it does not enable workload identity (as it is not required).
+make deploy-workshops
+```
+
+## Connection back to onprem
+For connection back to onprem, do the following:
+1. In the config file, change the CONNECT_ONPREM to `true`.
+
+2. Specify the shared VPC network and subnet (VPN) for the following fields (see example below):
+```
+NETWORK="projects/my-sharedvpc-project/global/networks/my-sharedvpc-us-east-1"
+SUBNETWORK="projects/my-sharedvpc-project/regions/us-east1/subnetworks/my-sharedvpc-subnet"
+```
+
+3. Also, make sure you specify the following in the "create-cluster" command:
+```
+--cluster-secondary-range-name "pods" \
+--services-secondary-range-name "services" \
+```
+
+4. Once the cluster and jupyterhub is installed, run the [IP masquerade agent](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent) by running the following command `make apply-ip-masq-agent`
+
 
 ## Individual make commands to build the cluster, install jupyterhub, and debug
 ```
