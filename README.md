@@ -46,7 +46,7 @@ make delete
 
 ## Deploying for workshops
 ```
-# comment out singleuser.serviceAccountName line in the config. As we are not enabling Workload Identity, having serviceAccountName should fail the deployment
+# comment out singleuser.serviceAccountName line in the config. As we are not enabling Workload Identity, having serviceAccountName will result in deployment failure
 
 # this is the same command as the `make deploy`, but it does not enable workload identity (as it is not required).
 make deploy-workshops
